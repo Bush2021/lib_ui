@@ -27,6 +27,10 @@
 #include <windows.h>
 #endif // Q_OS_WIN
 
+// AyuGram includes
+#include "ayu/ayu_ui_settings.h"
+
+
 void style_InitFontsResource() {
 #ifdef Q_OS_MACOS // Use resources from the .app bundle on macOS.
 
@@ -128,7 +132,9 @@ bool LoadCustomFont(const QString &filePath) {
 }
 
 [[nodiscard]] QString ManualMonospaceFont() {
+	const auto monoFont = AyuUiSettings::getMonoFont().isEmpty() ? "Cascadia Mono"_q : AyuUiSettings::getMonoFont();
 	const auto kTryFirst = std::initializer_list<QString>{
+		monoFont,
 		u"Cascadia Mono"_q,
 		u"Consolas"_q,
 		u"Liberation Mono"_q,
