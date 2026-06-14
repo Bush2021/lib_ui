@@ -433,6 +433,16 @@ void StartFonts() {
 		u"Ebrima"_q,
 		// https://qt-project.atlassian.net/browse/QTBUG-94756
 		u"Nirmala UI"_q,
+		// The Qt 6 windows-font-fallback patch leaves the legacy
+		// SimSun-led CJK list in qwindowsfontdatabasebase.cpp (the Qt 5
+		// patch rewrote it), so push modern CJK families ahead of it.
+		u"Microsoft YaHei UI"_q,
+		u"Microsoft YaHei"_q,
+		u"Microsoft JhengHei UI"_q,
+		u"Microsoft JhengHei"_q,
+		u"Malgun Gothic"_q,
+		u"Yu Gothic UI"_q,
+		u"Meiryo"_q,
 	});
 #elif defined Q_OS_MAC // Q_OS_WIN
 	const auto list = QStringList{
