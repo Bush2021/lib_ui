@@ -1112,8 +1112,8 @@ bool PopupMenu::prepareGeometryFor(
 	} else {
 		const auto badLeft = !r.isNull() && w.x() + width() - _margins.right() > r.x() + r.width();
 		if (forceRight || (badLeft && !forceLeft)) {
-			if (_parent && (r.isNull() || w.x() - parentWidth + _margins.left() + _margins.right() - width() + _margins.right() >= r.x() - _margins.left())) {
-				w.setX(w.x() + _margins.left() + _margins.right() - parentWidth - width() + _margins.left() + _margins.right());
+			if (_parent && (r.isNull() || w.x() - parentWidth + _margins.left() + _margins.right() - width() >= r.x() - _margins.left())) {
+				w.setX(w.x() - parentWidth + _margins.left() + _margins.right() - width());
 			} else {
 				w.setX(p.x() - width() + std::max(
 					_additionalMenuPadding.right() - _boxShadow.extend().right(),
