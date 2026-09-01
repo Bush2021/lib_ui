@@ -477,13 +477,16 @@ void Menu::mouseMoveEvent(QMouseEvent *e) {
 	handleMouseMove(e->globalPos());
 }
 
-void Menu::handleMouseMove(QPoint globalPosition) {
-	setLastMouseGlobal(globalPosition);
+bool Menu::inMenuArea(QPoint globalPosition) const {
 	const auto margins = style::margins(0, _st.skip, 0, _st.skip);
 	const auto visible = visibleRect();
 	const auto inner = rect().marginsRemoved(margins).intersected(visible);
-	const auto localPosition = mapFromGlobal(globalPosition);
-	if (inner.contains(localPosition)) {
+	return inner.contains(mapFromGlobal(globalPosition));
+}
+
+void Menu::handleMouseMove(QPoint globalPosition) {
+	setLastMouseGlobal(globalPosition);
+	if (inMenuArea(globalPosition)) {
 		updateSelected(globalPosition);
 	} else {
 		clearMouseSelection();
@@ -503,12 +506,7 @@ void Menu::mouseReleaseEvent(QMouseEvent *e) {
 
 void Menu::handleMousePress(QPoint globalPosition) {
 	handleMouseMove(globalPosition);
-	const auto margins = style::margins(0, _st.skip, 0, _st.skip);
-	const auto visible = visibleRect();
-	const auto inner = rect().marginsRemoved(margins).intersected(visible);
-	const auto localPosition = mapFromGlobal(globalPosition);
-	const auto pressed = (inner.contains(localPosition)
-		&& _lastSelectedByMouse)
+	const auto pressed = (inMenuArea(globalPosition) && _lastSelectedByMouse)
 		? findSelectedAction()
 		: nullptr;
 	if (pressed) {
@@ -529,11 +527,7 @@ void Menu::handleMouseRelease(QPoint globalPosition) {
 		}
 		return;
 	}
-	const auto margins = style::margins(0, _st.skip, 0, _st.skip);
-	const auto visible = visibleRect();
-	const auto inner = rect().marginsRemoved(margins).intersected(visible);
-	if (!inner.contains(mapFromGlobal(globalPosition))
-		&& _mouseReleaseDelegate) {
+	if (!inMenuArea(globalPosition) && _mouseReleaseDelegate) {
 		_mouseReleaseDelegate(globalPosition);
 	}
 }
