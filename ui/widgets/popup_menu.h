@@ -199,6 +199,8 @@ private:
 		_menu->handleMouseRelease(globalPosition);
 	}
 	void handleMouseRelease(QPoint globalPosition);
+	[[nodiscard]] PopupMenu *submenuForMouseRedirect(QPoint globalPosition);
+	void redirectMouseToSubmenu(Fn<void()> forward);
 
 	bool popupSubmenuFromAction(const Menu::CallbackData &data);
 	void popupSubmenu(
@@ -262,6 +264,7 @@ private:
 	bool _deleteLater = false;
 	bool _reactivateParent = true;
 	bool _grabbingForPanelAnimation = false;
+	bool _redirectingMouseToSubmenu = false;
 
 	int _touchBeginCounter = 0;
 	int _topShift = 0;
