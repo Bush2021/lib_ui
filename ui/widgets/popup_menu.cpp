@@ -601,6 +601,10 @@ void PopupMenu::handleMouseMove(QPoint globalPosition) {
 void PopupMenu::handleMousePress(QPoint globalPosition) {
 	if (_parent) {
 		_parent->forwardMousePress(globalPosition);
+	} else if (const auto submenu = submenuForMouseRedirect(globalPosition)) {
+		redirectMouseToSubmenu([=] {
+			submenu->forwardMousePress(globalPosition);
+		});
 	} else {
 		hideMenu();
 	}
@@ -609,8 +613,49 @@ void PopupMenu::handleMousePress(QPoint globalPosition) {
 void PopupMenu::handleMouseRelease(QPoint globalPosition) {
 	if (_parent) {
 		_parent->forwardMouseRelease(globalPosition);
+	} else if (const auto submenu = submenuForMouseRedirect(globalPosition)) {
+		redirectMouseToSubmenu([=] {
+			submenu->forwardMouseRelease(globalPosition);
+		});
 	} else {
 		hideMenu();
+	}
+}
+
+// Qt 6 keeps a single popup stack in QGuiApplicationPrivate::popup_list and
+// promotes whichever popup window gains focus to the top of it. The first
+// popup holds the mouse grab, so a press arrives on the root menu's window
+// and activates it, which puts the root above its own submenu. The press is
+// then mapped into the root instead of the submenu under the cursor, misses
+// everything, and would close the whole menu. Qt 5 keeps that list in show
+// order and cannot do this. Hand the press back down to the submenu it was
+// aimed at.
+PopupMenu *PopupMenu::submenuForMouseRedirect(QPoint globalPosition) {
+	if (_redirectingMouseToSubmenu) {
+		return nullptr;
+	}
+	auto result = (PopupMenu*)nullptr;
+	auto submenu = _activeSubmenu.data();
+	while (submenu) {
+		if (submenu->menu()->inMenuArea(globalPosition)) {
+			result = submenu;
+		}
+		submenu = submenu->_activeSubmenu.data();
+	}
+	return result;
+}
+
+// The flag stops the redirect from looping: when the submenu has nothing to
+// press at that position it walks the delegate chain back up to this menu,
+// which would otherwise pick the same submenu again. It is reset by hand
+// rather than by a scope guard, because forwarding runs the item's handler
+// and that is free to close and destroy this menu.
+void PopupMenu::redirectMouseToSubmenu(Fn<void()> forward) {
+	const auto weak = base::make_weak(this);
+	_redirectingMouseToSubmenu = true;
+	forward();
+	if (weak) {
+		_redirectingMouseToSubmenu = false;
 	}
 }
 
