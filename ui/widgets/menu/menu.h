@@ -118,6 +118,8 @@ public:
 	}
 	void handleMouseRelease(QPoint globalPosition);
 
+	[[nodiscard]] bool inMenuArea(QPoint globalPosition) const;
+
 	void handlePressedOutside(QPoint globalPosition);
 
 	void setSelected(int selected, bool isMouseSelection);
