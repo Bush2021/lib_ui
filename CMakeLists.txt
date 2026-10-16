@@ -36,6 +36,8 @@ PRIVATE
     fonts/fonts.qrc
     qt_conf/win.qrc
 
+    ayu/ayu_text_spacing.cpp
+    ayu/ayu_text_spacing.h
     ayu/ayu_ui_settings.cpp
     ayu/ayu_ui_settings.h
 
