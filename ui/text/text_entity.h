@@ -333,6 +333,7 @@ enum {
 	TextParseMarkdown = 0x020,
 	TextParseColorized = 0x040,
 	TextParseKeepLeadingSpaces = 0x080,
+	TextParseCjkSpacing = 0x10000,
 };
 
 struct TextWithTags {
