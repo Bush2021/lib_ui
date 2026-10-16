@@ -24,4 +24,7 @@ bool isMaterialSwitches();
 void setAvatarCorners(int val);
 int getAvatarCorners();
 
+void setCjkSpacing(bool val);
+bool isCjkSpacing();
+
 }

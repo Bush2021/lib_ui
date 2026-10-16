@@ -14,6 +14,7 @@ QString monoFont;
 double wideMultiplier = 1.0;
 bool materialSwitches;
 int avatarCorners = kMaxAvatarCorners;
+bool cjkSpacing = false;
 
 void setMonoFont(QString newFont) {
 	monoFont = std::move(newFont);
@@ -53,6 +54,14 @@ void setAvatarCorners(int val) {
 
 int getAvatarCorners() {
 	return avatarCorners;
+}
+
+void setCjkSpacing(bool val) {
+	cjkSpacing = val;
+}
+
+bool isCjkSpacing() {
+	return cjkSpacing;
 }
 
 }
