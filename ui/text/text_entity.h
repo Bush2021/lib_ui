@@ -332,6 +332,7 @@ enum {
 	TextParseBotCommands = 0x010,
 	TextParseMarkdown = 0x020,
 	TextParseColorized = 0x040,
+	TextParseCjkSpacing = 0x10000,
 };
 
 struct TextWithTags {

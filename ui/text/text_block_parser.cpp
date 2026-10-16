@@ -6,6 +6,8 @@
 //
 #include "ui/text/text_block_parser.h"
 
+#include "ayu/ayu_text_spacing.h"
+#include "ayu/ayu_ui_settings.h"
 #include "base/platform/base_platform_info.h"
 #include "ui/integration.h"
 #include "ui/text/text_extended_data.h"
@@ -729,7 +731,31 @@ void BlockParser::parse(const TextParseOptions &options) {
 		_t->insertModifications(0, -(_ptr - _start));
 	}
 
+	const auto spaces = ((options.flags & TextParseCjkSpacing)
+			&& AyuUiSettings::isCjkSpacing())
+		? AyuTextSpacing::FindInsertions(_source)
+		: std::vector<int>();
+	auto space = spaces.begin();
+	const auto insertSpace = [&] {
+		// Recorded as added, so quote ranges still map to the source text.
+		finishEntities();
+		if (_newlineAwaited || !_customEmojiData.isEmpty()) {
+			return;
+		} else if (_emoji) {
+			createBlock();
+		}
+		_t->insertModifications(_tText.size(), 1);
+		_tText.push_back(QChar::Space);
+		_allowDiacritic = false;
+	};
+
 	for (; _ptr <= _end; ++_ptr) {
+		while (space != spaces.end() && (_start + *space) < _ptr) {
+			++space;
+		}
+		if (space != spaces.end() && (_start + *space) == _ptr) {
+			insertSpace();
+		}
 		while (checkEntities()) {
 		}
 		parseCurrentChar();
