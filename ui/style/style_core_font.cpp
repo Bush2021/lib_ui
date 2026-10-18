@@ -17,6 +17,12 @@
 #include <QtGui/QFontInfo>
 #include <QtGui/QFontDatabase>
 
+#ifdef Q_OS_WIN
+#include <private/qguiapplication_p.h>
+#include <qpa/qplatformfontdatabase.h>
+#include <qpa/qplatformintegration.h>
+#endif // Q_OS_WIN
+
 #if __has_include(<glib.h>)
 #include <glib.h>
 #endif // __has_include(<glib.h>)
@@ -367,6 +373,56 @@ struct Metrics {
 	};
 }
 
+#ifdef Q_OS_WIN
+
+// WHY: Qt falls back to its own short list, then to every family in
+// alphabetical order, trying only the first 255, so script fonts named late
+// in the alphabet are never reached. Keep Qt's list first, then add them.
+void AddScriptFallbacks(const QString &main) {
+	const auto platform = QGuiApplicationPrivate::platformIntegration()
+		->fontDatabase();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+	constexpr auto script = QFontDatabasePrivate::Script_Common;
+#else
+	constexpr auto script = QChar::Script_Common;
+#endif // Qt >= 6.9
+	auto fallbacks = platform->fallbacksForFamily(
+		main,
+		QFont::StyleNormal,
+		QFont::AnyStyle,
+		script);
+	fallbacks = fallbacks.mid(0, fallbacks.indexOf(u"Segoe UI Symbol"_q) + 1);
+
+	const auto database = QFontDatabase();
+	for (const auto &family : {
+		u"Javanese Text"_q,
+		u"Leelawadee UI"_q,
+		u"Myanmar Text"_q,
+		u"Gadugi"_q,
+		u"Microsoft Himalaya"_q,
+		u"Mongolian Baiti"_q,
+		u"Microsoft Tai Le"_q,
+		u"Microsoft New Tai Lue"_q,
+		u"Microsoft PhagsPa"_q,
+		u"Microsoft Yi Baiti"_q,
+		u"MV Boli"_q,
+		u"Segoe UI Historic"_q,
+		u"Sans Serif Collection"_q,
+		u"MingLiU-ExtB"_q,
+	}) {
+		if (database.hasFamily(family)) {
+			fallbacks.push_back(family);
+		}
+	}
+	for (const auto &family : database.families()) {
+		auto list = fallbacks;
+		list.removeAll(family);
+		QFont::insertSubstitutions(family, list);
+	}
+}
+
+#endif // Q_OS_WIN
+
 } // namespace
 
 void StartFonts() {
@@ -414,6 +470,7 @@ void StartFonts() {
 		u"Yu Gothic UI"_q,
 		u"Meiryo"_q,
 	});
+	AddScriptFallbacks(name);
 #elif defined Q_OS_MAC // Q_OS_WIN
 	const auto list = QStringList{
 		u"STIXGeneral"_q,
