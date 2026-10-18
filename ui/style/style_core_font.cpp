@@ -319,6 +319,10 @@ struct Metrics {
 		FontFlags flags,
 		int size) {
 	auto font = QFont(QFont().family());
+#ifdef Q_OS_WIN
+	// Bitmap fonts like Fixedsys claim any character and draw a black block.
+	font.setStyleStrategy(QFont::ForceOutline);
+#endif // Q_OS_WIN
 
 	const auto monospace = (flags & FontFlag::Monospace) != 0;
 	const auto system = !monospace && (family == SystemFontTag());
